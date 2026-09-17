@@ -1,6 +1,7 @@
 # Fe — Agente CLI Local v0.1.0
 
-![Status](https://img.shields.io/badge/status-development-yellow)
+[![CI](https://github.com/adonizgomez00-glitch/fe/actions/workflows/ci.yml/badge.svg)](https://github.com/adonizgomez00-glitch/fe/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/adonizgomez00-glitch/fe)](https://github.com/adonizgomez00-glitch/fe/releases/latest)
 ![Lang](https://img.shields.io/badge/lang-Rust-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Tests](https://img.shields.io/badge/tests-348_pass-green)
@@ -122,6 +123,32 @@ fe doctor
 | `--fast` | Usa modelo rápido (gemma3:4b, sin tools) |
 | `--dry-run` | Muestra plan sin ejecutar |
 | `--destructive` | Omite confirmación extra para acciones destructivas |
+
+---
+
+## CI/CD
+
+El proyecto usa **GitHub Actions** con dos workflows:
+
+| Workflow | Disparador | Qué hace |
+|----------|-----------|----------|
+| [`ci.yml`](.github/workflows/ci.yml) | Push a `main` y Pull Requests | `cargo build` + `cargo test` + build release + smoke test del binario |
+| [`release.yml`](.github/workflows/release.yml) | Push de tag `v*` | Tests + `./release.sh` + verificación de integridad + publica GitHub Release con los 3 artefactos |
+
+### Publicar una nueva versión
+
+```bash
+# 1. Actualiza VERSION en Cargo.toml, release.sh e install.sh
+# 2. Commit y tag
+git commit -am "chore: bump version a v0.2.0"
+git tag v0.2.0
+git push origin main --tags
+```
+
+El workflow `release.yml` empaqueta, verifica checksums y publica el release automáticamente.
+
+> ⚠️ **Importante**: `release.sh` tiene la `VERSION` hardcodeada. El workflow valida que el
+> paquete generado coincida con el tag y **falla con un mensaje claro** si no se actualizó.
 
 ---
 

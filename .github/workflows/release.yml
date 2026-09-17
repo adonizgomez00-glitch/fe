@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry & build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-release-
+            ${{ runner.os }}-cargo-
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Empaquetar release
+        run: ./release.sh
+
+      - name: Verificar versión del tag vs binario
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Tag version: $VERSION"
+          ./target/release/fe --version
+          if ! ./target/release/fe --version | grep -q "$VERSION"; then
+            echo "::error::La versión del binario no coincide con el tag $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+      - name: Verificar integridad del paquete
+        run: |
+          PACKAGE="fe-${GITHUB_REF_NAME}.tar.gz"
+          if [ ! -f "$PACKAGE" ]; then
+            echo "::error::Paquete esperado no encontrado: $PACKAGE"
+            echo "Archivos generados:"
+            ls -la fe-*.tar.gz fe-*.sha256 2>/dev/null || true
+            echo "::error::release.sh tiene la VERSION hardcodeada; actualiza VERSION en release.sh para el tag $GITHUB_REF_NAME"
+            exit 1
+          fi
+          sha256sum -c "fe-${GITHUB_REF_NAME}.sha256"
+          tar -tzf "$PACKAGE"
+
+      - name: Smoke test del binario empaquetado
+        run: |
+          mkdir -p /tmp/pkg-check
+          tar -xzf "fe-${GITHUB_REF_NAME}.tar.gz" -C /tmp/pkg-check
+          "/tmp/pkg-check/fe-${GITHUB_REF_NAME}/fe" --version
+
+      - name: Publicar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Fe ${{ github.ref_name }} — Agente CLI local con Ollama
+          generate_release_notes: true
+          files: |
+            fe-${{ github.ref_name }}.tar.gz
+            fe-${{ github.ref_name }}.sha256
+            fe-${{ github.ref_name }}.files.sha256
