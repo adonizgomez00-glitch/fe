@@ -16,6 +16,25 @@ use async_trait::async_trait;
 use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+// Cada test conserva TempDir hasta terminar: sin depender de skills/config del usuario.
+fn test_config() -> (tempfile::TempDir, Config) {
+    let dir = tempfile::tempdir().unwrap();
+    let mut config = Config::default();
+    config.paths.skills_dir = dir.path().join("skills");
+    config.paths.sessions_dir = dir.path().join("sessions");
+    config.paths.checkpoints_dir = dir.path().join("checkpoints");
+    config.paths.plugins_dir = dir.path().join("plugins");
+    config.paths.config_dir = dir.path().join("config");
+    config.mcp.enabled = false;
+    config.mcp.servers.clear();
+    let skill_dir = config.paths.skills_dir.join("linux/linux-admin");
+    std::fs::create_dir_all(&skill_dir).unwrap();
+    std::fs::write(skill_dir.join("SKILL.md"),
+        "---\nname: linux-admin\ndescription: Administra el sistema linux y su mantenimiento; configura el firewall de linux.\n---\n# Linux\nAdministración y mantenimiento del sistema linux.\n"
+    ).unwrap();
+    (dir, config)
+}
+
 // Helper para construir GlobalFlags por defecto en tests
 fn test_flags() -> GlobalFlags {
     GlobalFlags {
@@ -153,29 +172,22 @@ fn test_e2e_session_export_clean() {
 
 #[test]
 fn test_e2e_skills_loading() {
-    let config = Config::default();
-    let skills = SkillsLoader::load_from(&config.paths.skills_dir).unwrap_or_default();
-    assert!(skills.len() >= 1, "Debe cargar al menos 1 skill");
+    let (_dir, config) = test_config();
+    let skills = SkillsLoader::load_from(&config.paths.skills_dir).unwrap();
+    assert_eq!(skills.len(), 1, "Debe cargar la skill de prueba");
 }
 
 #[test]
 fn test_e2e_skills_match_prompt() {
-    let config = Config::default();
-    let skills = SkillsLoader::load_from(&config.paths.skills_dir).unwrap_or_default();
-
-    if skills.len() > 0 {
-        let matched = skills.match_prompt("configura el firewall de linux");
-        let kind_str = |s: &&crate::agent::skills::Skill| format!("{:?}", s.kind()).to_lowercase();
-        let has_linux = matched.iter().any(|(s, _)| kind_str(s).contains("linux"));
-        let has_security = matched.iter().any(|(s, _)| kind_str(s).contains("security"));
-
-        assert!(has_linux || has_security, "Debe matchear linux o security");
-
-        let format_result = skills.format_skills_for_prompt(
-            &matched.iter().map(|(s, _)| *s).collect::<Vec<_>>()
-        );
-        assert!(!format_result.is_empty(), "format_skills debe producir texto");
-    }
+    let (_dir, config) = test_config();
+    let skills = SkillsLoader::load_from(&config.paths.skills_dir).unwrap();
+    let matched = skills.match_prompt("configura el firewall de linux");
+    assert_eq!(matched.len(), 1);
+    assert_eq!(matched[0].1, crate::agent::skills::SkillKind::Linux);
+    let formatted = skills.format_skills_for_prompt(
+        &matched.iter().map(|(s, _)| *s).collect::<Vec<_>>()
+    );
+    assert!(formatted.contains("linux-admin"));
 }
 
 #[test]
@@ -301,7 +313,7 @@ fn test_e2e_session_clean_old() {
 /// Test: Agent puede ejecutar flujo simple con herramientas registradas
 #[tokio::test]
 async fn test_e2e_agent_bash_execution() {
-    let config = Config::default();
+    let (_dir, config) = test_config();
     let flags = test_flags();
 
     let agent = Agent::new(config, test_flags()).await;
@@ -337,7 +349,7 @@ async fn test_e2e_agent_destructive_dry_run() {
 /// Test: Skills cargadas y matching funciona en contexto de agente
 #[tokio::test]
 async fn test_e2e_agent_skills_matching() {
-    let config = Config::default();
+    let (_dir, config) = test_config();
     let agent = Agent::new(config, test_flags()).await;
     let skills = agent.get_skills();
 
