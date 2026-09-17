@@ -1,0 +1,65 @@
+# Configuración de Fe
+# Ruta: ~/.config/fe/config.toml
+# Orden de precedencia: defaults < config.toml < env vars < CLI flags
+
+[ollama]
+host = "http://localhost:11434"
+timeout_secs = 300
+max_retries = 3
+keep_alive_secs = 300
+
+[models]
+complex = "qwen2.5:3b"
+simple = "gemma3:4b"
+reasoning = "qwen2.5:3b"
+summarizer = "gemma3:4b"
+
+[agent]
+name = "fe"
+confirm_tools = true
+batch_mode = false
+auto_save = true
+summarize_every_n_turns = 4
+max_history_turns = 20
+max_context_tokens = 8192
+
+[tools]
+bash_timeout_secs = 120
+max_output_lines = 5000
+max_output_bytes = 1048576
+allow_destructive = false
+
+[paths]
+sessions_dir = "~/.local/share/fe/sessions"
+skills_dir = "~/.config/opencode/skills"
+plugins_dir = "~/.config/fe/plugins"
+config_dir = "~/.config/fe"
+
+[shell]
+generate_completions = true
+shells = ["bash", "zsh", "fish"]
+
+# Plugins — Día 9+
+# Instala plugins en ~/.config/fe/plugins/<nombre>/plugin.toml
+# Luego usa: fe plugins list
+# El runtime de plugins estará disponible en próxima actualización
+
+# MCP (Model Context Protocol) — Día 7+
+[mcp]
+enabled = true
+
+# Ejemplo servidor filesystem Python
+# [[mcp.servers]]
+# name = "filesystem"
+# command = "python3"
+# args = ["/home/user/mcp-servers/filesystem_server.py", "/home/user/projects"]
+# env = {}
+# enabled = true
+
+# Ejemplo servidor GitHub (requiere npx)
+# [[mcp.servers]]
+# name = "github"
+# command = "npx"
+# args = ["-y", "@modelcontextprotocol/server-github"]
+# env = { GITHUB_TOKEN = "ghp_xxx" }
+# enabled = true

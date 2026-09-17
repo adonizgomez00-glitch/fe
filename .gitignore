@@ -1,0 +1,36 @@
+# ─── Rust ───────────────────────────────────────────────────────
+/target/
+**/*.rs.bk
+*.pdb
+
+# ─── Build artifacts & releases ─────────────────────────────────
+*.tar.gz
+*.sha256
+!fe-v0.1.0.files.sha256
+
+# ─── Config local y sesiones ────────────────────────────────────
+config.toml
+.fe/
+sessions/
+checkpoints/
+
+# ─── Entornos ───────────────────────────────────────────────────
+.env
+.env.local
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# ─── Editores / OS ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Logs ───────────────────────────────────────────────────────
+*.log
+logs/

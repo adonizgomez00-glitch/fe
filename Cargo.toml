@@ -1,0 +1,66 @@
+[package]
+name = "fe"
+version = "0.1.0"
+edition = "2021"
+description = "Local AI agent for system administration and development"
+authors = ["adonis"]
+license = "MIT"
+repository = "https://github.com/adonis/fe"
+readme = "README.md"
+
+[dependencies]
+# CLI
+clap = { version = "4.5", features = ["derive", "env", "string"] }
+clap_complete = "4.5"
+
+# Async
+tokio = { version = "1.40", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "stream", "rustls-tls", "gzip"] }
+tokio-stream = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+toml_edit = "0.22"
+
+# System
+dirs = "5.0"
+anyhow = "1.0"
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.8", features = ["v4", "serde", "fast-rng"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+# UI
+console = "0.15"
+indicatif = "0.17"
+crossterm = "0.27"
+
+# Skills matching
+similar = "2.3"
+async-trait = "0.1"
+
+# Utilities
+walkdir = "2.5"
+ignore = "0.4"
+url = "2.5"
+regex = "1"
+globset = "0.4"
+
+[dev-dependencies]
+tempfile = "3.10"
+wiremock = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[[bin]]
+name = "fe"
+path = "src/main.rs"
