@@ -5,7 +5,7 @@ edition = "2021"
 description = "Local AI agent for system administration and development"
 authors = ["adonis"]
 license = "MIT"
-repository = "https://github.com/adonis/fe"
+repository = "https://github.com/adonizgomez00-glitch/fe"
 readme = "README.md"
 
 [dependencies]

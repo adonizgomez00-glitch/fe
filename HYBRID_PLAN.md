@@ -199,7 +199,7 @@ src/agent/core.rs
 2. ✅ E2E tests: cobertura de flujos core (bash execution, destructive dry_run, skills matching, router model selection, core services, session lifecycle, direct executor, release checklist)
 3. ✅ `cargo test` → 348 passing (0 failures), meta 300+ superada
 4. ✅ `cargo build --release` + `install.sh` (VERSION alineada a 0.1.0)
-5. ⏭️ `git tag v0.1.0` — no aplicable: el directorio no es un repositorio git
+5. ✅ `git tag v0.1.0` — tag creado y subido a `origin` (GitHub)
 
 **Nuevos tests agregados (Fase 4):**
 - `test_e2e_agent_bash_execution` — herramientas + skills + router
@@ -246,7 +246,7 @@ src/agent/core.rs
 - [ ] `fe plugin run test-plugin greet --nombre Mundo` — plugins ok (requiere Ollama activo)
 - [ ] `fe daemon start && fe "hola" && fe daemon stop` — daemon ok (requiere Ollama activo)
 - [ ] `./install.sh` — binario en PATH
-- [ ] `git tag v0.1.0 && git push --tags` — N/A: no es repo git
+- [x] `git tag v0.1.0 && git push --tags` — tag creado y subido a origin
 
 > Nota: las validaciones manuales del CLI requieren un servidor Ollama en ejecución;
 > la cobertura automatizada equivalente se logra con los tests E2E de la Fase 4.

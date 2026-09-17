@@ -42,7 +42,7 @@ ollama pull qwen2.5:3b
 ollama pull gemma3:4b
 
 # Instalar Fe
-git clone <repo-url> fe
+git clone https://github.com/adonizgomez00-glitch/fe.git fe
 cd fe
 ./install.sh
 ```
